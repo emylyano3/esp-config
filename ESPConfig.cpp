@@ -168,7 +168,7 @@ bool ESPConfig::addParameter(ESPConfigParam *p) {
   }
   _configParams[_paramsCount] = p;
   _paramsCount++;
-  debug(F("Adding parameter"), p->_name);
+  debug(F("Adding parameter"), p->getName());
   return true;
 }
 
@@ -274,12 +274,11 @@ void ESPConfig::setupConfigPortal() {
   _dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
   _dnsServer->start(DNS_PORT, "*", WiFi.softAPIP());
   /* Setup web pages */
-  _server->on("/", std::bind(handleWifi, false));
-  _server->on("/config", std::bind(handleWifi, false));
-  //Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.
-  _server->on("/scan", std::bind(handleWifi, true)); 
-  _server->on("/wifisave", handleWifiSave);
-  _server->onNotFound(handleNotFound);
+  _server->on("/", std::bind(&ESPConfig::handleWifi, false));
+  _server->on("/config", std::bind(&ESPConfig::handleWifi, false));
+  _server->on("/scan", std::bind(&ESPConfig::handleWifi, true)); 
+  _server->on("/wifisave", std::bind(&ESPConfig::handleWifiSave, this));
+  _server->onNotFound(std::bind(&ESPConfig::handleNotFound, this));
   _server->begin();
   debug(F("HTTP server started"));
 }
@@ -364,7 +363,7 @@ void ESPConfig::handleWifi(bool scan) {
         String ops = "";
         for (size_t j = 0; j < _configParams[i]->getOptions().size(); ++j) {
           String op = FPSTR(HTTP_FORM_INPUT_LIST_OPTION);
-          op.replace("{o}", _configParams[i]->getOptions();
+          op.replace("{o}", _configParams[i]->getOptions());
           ops.concat(op);
         }
         pitem.replace("{p}", _configParams[i]->getLabel());

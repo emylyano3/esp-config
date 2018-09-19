@@ -40,7 +40,7 @@ class ESPConfigParam {
         ESPConfigParam (InputType type, const char* name, const char* label, const char* defVal, uint8_t length, const char* html);
         ~ESPConfigParam();
 
-        const char*         getType();
+        InputType           getType();
         const char*         getName();
         const char*         getLabel();
         const char*         getValue();
