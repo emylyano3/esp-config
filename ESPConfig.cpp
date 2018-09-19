@@ -363,7 +363,7 @@ void ESPConfig::handleWifi(bool scan) {
         String ops = "";
         for (size_t j = 0; j < _configParams[i]->getOptions().size(); ++j) {
           String op = FPSTR(HTTP_FORM_INPUT_LIST_OPTION);
-          op.replace("{o}", _configParams[i]->getOptions());
+          op.replace("{o}", _configParams[i]->getOptions()[j]);
           ops.concat(op);
         }
         pitem.replace("{p}", _configParams[i]->getLabel());
