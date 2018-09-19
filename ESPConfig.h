@@ -118,7 +118,6 @@ class ESPConfig {
         void    (*_savecallback)(void)              = NULL;
         char*   (*_getStationNameCallback)(void)    = NULL;
         
-
         void        handleRoot();
         void        handleWifi(boolean scan);
         void        handleWifiSave();
