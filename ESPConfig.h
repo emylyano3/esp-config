@@ -34,9 +34,8 @@ class ESPConfigParam {
 
     public:
         ESPConfigParam();
-        ESPConfigParam (InputType type, const char* name, const char* label, const char* defVal, uint8t length, const char* html);
+        ESPConfigParam (InputType type, const char* name, const char* label, const char* defVal, uint8_t length, const char* html);
         ~ESPConfigParam();
-        void updateValue (const char *v);
 
         const char* getName();
         const char* getValue();
@@ -71,7 +70,7 @@ class ESPConfig {
         void    setDebugOutput(boolean debug);
         
         //called when AP mode and config portal is started
-        void    setAPCallback( void (*func)(WiFiManager*) );
+        void    setAPCallback( void (*func)(ESPConfig*) );
         
         //called when connecting station to AP
         void    setStationNameCallback(char* (*func)(void));
@@ -86,7 +85,7 @@ class ESPConfig {
         void    signalFeedback (uint8_t pin, long stepTime, uint8_t times);
 
         // Non blocking signal feedback (to be used inside a loop). Uses global variables to control when to flip the signal state according to the step time.
-        void    signalFeedback(uint8_t pin, int stepTime)
+        void    signalFeedback(uint8_t pin, int stepTime);
 
     private:
 

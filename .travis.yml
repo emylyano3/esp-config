@@ -21,7 +21,7 @@ before_install:
 #    - arduino --install-library "Adafruit ILI9341","Adafruit GFX Library"
 
 script:
-   - build_main_platforms
+   - build_platform esp8266
 
 # Generate and deploy documentation
 # after_success:
