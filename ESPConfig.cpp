@@ -1,6 +1,6 @@
 #include "ESPConfig.h"
 
-ESPConfigParam::ConfigParam (InputType type, const char* name, const char* label, const char* defVal, uint8_t length, const char* html) {
+ESPConfigParam::ESPConfigParam (InputType type, const char* name, const char* label, const char* defVal, uint8_t length, const char* html) {
   _type = type;
   _name = name;
   _label = label;
@@ -10,7 +10,7 @@ ESPConfigParam::ConfigParam (InputType type, const char* name, const char* label
   updateValue(defVal);
 }
 
-ESPConfigParam::~ConfigParam() {
+ESPConfigParam::~ESPConfigParam() {
   if (_value != NULL) {
     delete[] _value;
   }
@@ -22,7 +22,7 @@ void ESPConfigParam::updateValue (const char *v) {
 }
 
 ESPConfig::ESPConfig() {
-    _configParams = (ConfigParam**)malloc(PARAMS_COUNT * sizeof(ConfigParam*));
+    _configParams = (ESPConfigParam**)malloc(PARAMS_COUNT * sizeof(ESPConfigParam*));
 }
 
 ESPConfig::~ESPConfig() {
@@ -69,7 +69,9 @@ bool ESPConfig::startConfigPortal() {
       debug(F("Connecting to new AP"));
       // using user-provided  _ssid, _pass in place of system-stored ssid and pass
       //end the led feedback
-      digitalWrite(LED_PIN, LOW);
+      if (_feedbackPin != -1) {
+        digitalWrite(_feedbackPin, LOW);
+      }
       if (connectWifi(_server->arg("s").c_str(), _server->arg("p").c_str()) != WL_CONNECTED) {
         debug(F("Failed to connect."));
         break;
@@ -131,7 +133,7 @@ bool ESPConfig::addParameter(ESPConfigParam *p) {
   }
   _configParams[_paramsCount] = p;
   _paramsCount++;
-  debug(F("Adding parameter"), p->getID());
+  debug(F("Adding parameter"), p->getName());
   return true;
 }
 
@@ -157,7 +159,7 @@ void ESPConfig::signalFeedback(uint8_t pin, int stepTime) {
 uint8_t ESPConfig::connectWifi(String ssid, String pass) {
   debug(F("Connecting as wifi client..."));
   if (WiFi.status() == WL_CONNECTED) {
-    debug("Already connected. Bailing out.");
+    debug(F("Already connected. Bailing out."));
     return WL_CONNECTED;
   }
   WiFi.hostname(getStationName());
@@ -169,7 +171,7 @@ uint8_t ESPConfig::connectWiFi() {
   WiFi.mode(WIFI_STA);
   WiFi.hostname(getStationName());
   if (WiFi.SSID()) {
-    debug("Using last saved values, should be faster");
+    debug(F("Using last saved values, should be faster"));
     //trying to fix connection in progress hanging
     ETS_UART_INTR_DISABLE();
     wifi_station_disconnect();
@@ -177,7 +179,7 @@ uint8_t ESPConfig::connectWiFi() {
     WiFi.begin();
     return waitForConnectResult();
   } else {
-    debug("No saved credentials");
+    debug(F("No saved credentials"));
     return WL_CONNECT_FAILED;
   }
 }
@@ -199,8 +201,7 @@ uint8_t ESPConfig::waitForConnectResult() {
       if (status == WL_CONNECTED) {
         keepConnecting = false;
       } else if (status == WL_CONNECT_FAILED) {
-        debug(F("Connection failed. Retrying: "));
-        debug(++retry);
+        debug(F("Connection failed. Retrying: "), ++retry);
         debug("Trying to begin connection again");
         WiFi.begin();
       }

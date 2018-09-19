@@ -67,7 +67,8 @@ class ESPConfig {
         void    setPortalSSID(const char *apName);
         void    setPortalPassword(const char *apPass);
         bool    addParameter(ESPConfigParam *p);
-        void    setDebugOutput(boolean debug);
+        void    setDebugOutput(bool debug);
+        void    setFeedbackPin(uint8_t pin);
         
         //called when AP mode and config portal is started
         void    setAPCallback( void (*func)(ESPConfig*) );
@@ -99,6 +100,7 @@ class ESPConfig {
         uint8_t         _max_params;
         bool            _connect;
         bool            _debug              = true;
+        uint8_t         _feedbackPin        = -1;
 
         uint8_t     connectWifi(String ssid, String pass);
         uint8_t     connectWiFi();
@@ -130,7 +132,7 @@ class ESPConfig {
         String      toStringIp(IPAddress ip);
         int         getRSSIasQuality(int RSSI);
 
-        template <class T> void log(T text);
-        template <class T, class U> void log(T key, U value);
+        template <class T> void debug(T text);
+        template <class T, class U> void debug(T key, U value);
 };
 #endif
