@@ -125,16 +125,20 @@ bool ESPConfig::startConfigPortal() {
   return  WiFi.status() == WL_CONNECTED;
 }
 
+void ESPConfig::setTimeout(unsigned long seconds) {}
+  _connectionTimeout = seconds;
+}
+
 void ESPConfig::setPortalSSID(const char *apName) {
-    _apName = apName;
+  _apName = apName;
 }
 
 void ESPConfig::setPortalPassword(const char *apPass) {
-    _apPass = apPass;
+  _apPass = apPass;
 }
 
 void ESPConfig::setMinimumSignalQuality(int quality) {
-    _minimumQuality = quality;
+  _minimumQuality = quality;
 }
 
 void ESPConfig::setDebugOutput(bool debug) {
