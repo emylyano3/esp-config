@@ -11,8 +11,8 @@ void setup() {
     moduleConfig.setTimeout(30000);
     moduleConfig.setPortalSSID("ConfigTesting");
     moduleConfig.setPortalPassword("mistery");
-    moduleConfig.addParameter(param1);
-    moduleConfig.addParameter(param2);
+    moduleConfig.addParameter(&param1);
+    moduleConfig.addParameter(&param2);
     moduleConfig.connectWifiNetwork(false);
     moduleConfig.blockingFeedback(LED_PIN, 500, 5);
 }
