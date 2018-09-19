@@ -105,6 +105,8 @@ class ESPConfig {
         bool            _debug              = true;
         uint8_t         _feedbackPin        = INVALID_PIN_NO;
 
+        const uint8_t   DNS_PORT            = 53;
+
         uint8_t     connectWifi(String ssid, String pass);
         uint8_t     connectWiFi();
         uint8_t     waitForConnectResult();

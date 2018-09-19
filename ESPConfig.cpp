@@ -22,7 +22,7 @@ void ESPConfigParam::updateValue (const char *v) {
 }
 
 ESPConfig::ESPConfig() {
-    _max_params = WIFI_MANAGER_MAX_PARAMS
+    _max_params = ESP_CONFIG_MAX_PARAMS;
     _configParams = (ESPConfigParam**)malloc(_max_params * sizeof(ESPConfigParam*));
 }
 
@@ -30,9 +30,9 @@ ESPConfig::~ESPConfig() {
     if (_configParams != NULL) {
         debug(F("Freeing allocated params!"));
         // for (uint8_t i = 0; i < PARAMS_COUNT; ++i) {
-        //     _configParams[i]->name = NULL;
-        //     _configParams[i]->label = NULL;
-        //     _configParams[i]->customHTML = NULL;
+        //     _configParams[i]->_name = NULL;
+        //     _configParams[i]->_label = NULL;
+        //     _configParams[i]->_customHTML = NULL;
         // }
         free(_configParams);
     }
@@ -130,9 +130,9 @@ bool ESPConfig::addParameter(ESPConfigParam *p) {
     // rezise the params array
     _max_params += ESP_CONFIG_MAX_PARAMS;
     debug(F("Increasing _max_params to:"), _max_params);
-    ESPConfigParam** new_params = (ESPConfigParam**)realloc(_configParams, _max_params * sizeof(ESPConfigParam*));
-    if (new_params != NULL) {
-      _configParams = new_params;
+    ESPConfigParam** newParams = (ESPConfigParam**)realloc(_configParams, _max_params * sizeof(ESPConfigParam*));
+    if (newParams != NULL) {
+      _configParams = newParams;
     } else {
       debug(F("ERROR: failed to realloc params, size not increased!"));
       return false;
@@ -140,7 +140,7 @@ bool ESPConfig::addParameter(ESPConfigParam *p) {
   }
   _configParams[_paramsCount] = p;
   _paramsCount++;
-  debug(F("Adding parameter"), p->getName());
+  debug(F("Adding parameter"), p->_name);
   return true;
 }
 
@@ -167,14 +167,18 @@ uint8_t ESPConfig::connectWifi(String ssid, String pass) {
     debug(F("Already connected. Bailing out."));
     return WL_CONNECTED;
   }
-  WiFi.hostname(getStationName());
+  if (_getStationNameCallback) {
+    WiFi.hostname(_getStationNameCallback());
+  }
   WiFi.begin(ssid.c_str(), pass.c_str());
   return waitForConnectResult();
 }
 
 uint8_t ESPConfig::connectWiFi() {
   WiFi.mode(WIFI_STA);
-  WiFi.hostname(getStationName());
+  if (_getStationNameCallback) {
+    WiFi.hostname(_getStationNameCallback());
+  }
   if (WiFi.SSID()) {
     debug(F("Using last saved values, should be faster"));
     //trying to fix connection in progress hanging
@@ -324,30 +328,30 @@ void ESPConfig::handleWifi(bool scan) {
   char parLength[5];
   // add the extra parameters to the form
   for (int i = 0; i < PARAMS_COUNT; i++) {
-    if (_configParams[i]->name != NULL) {
-      if (_configParams[i]->type == Combo) {
+    if (_configParams[i]->_name != NULL) {
+      if (_configParams[i]->_type == Combo) {
         String pitem = FPSTR(HTTP_FORM_INPUT_LIST);
-        pitem.replace("{i}", _configParams[i]->name);
-        pitem.replace("{n}", _configParams[i]->name);
+        pitem.replace("{i}", _configParams[i]->_name);
+        pitem.replace("{n}", _configParams[i]->_name);
         String ops = "";
-        for (size_t j = 0; j < _configParams[i]->options.size(); ++j) {
+        for (size_t j = 0; j < _configParams[i]->_options.size(); ++j) {
           String op = FPSTR(HTTP_FORM_INPUT_LIST_OPTION);
-          op.replace("{o}", _configParams[i]->options[j]);
+          op.replace("{o}", _configParams[i]->_options[j]);
           ops.concat(op);
         }
-        pitem.replace("{p}", _configParams[i]->label);
+        pitem.replace("{p}", _configParams[i]->_label);
         pitem.replace("{o}", ops);
-        pitem.replace("{c}", _configParams[i]->customHTML);
+        pitem.replace("{c}", _configParams[i]->_customHTML);
         page += pitem;
       } else {
         String pitem = FPSTR(HTTP_FORM_INPUT);
-        pitem.replace("{i}", _configParams[i]->name);
-        pitem.replace("{n}", _configParams[i]->name);
-        pitem.replace("{p}", _configParams[i]->label);
-        snprintf(parLength, 5, "%d", _configParams[i]->length);
+        pitem.replace("{i}", _configParams[i]->_name);
+        pitem.replace("{n}", _configParams[i]->_name);
+        pitem.replace("{p}", _configParams[i]->_label);
+        snprintf(parLength, 5, "%d", _configParams[i]->_length);
         pitem.replace("{l}", parLength);
-        pitem.replace("{v}", _configParams[i]->value);
-        pitem.replace("{c}", _configParams[i]->customHTML);
+        pitem.replace("{v}", _configParams[i]->_value);
+        pitem.replace("{c}", _configParams[i]->_customHTML);
         page += pitem;
       }
     } 
@@ -386,8 +390,8 @@ void ESPConfig::handleNotFound() {
 /** Handle the WLAN save form and redirect to WLAN config page again */
 void ESPConfig::handleWifiSave() {
   for (int i = 0; i < PARAMS_COUNT; i++) {
-    _configParams[i]->updateValue(_server->arg(_configParams[i]->name).c_str());
-    debug(_configParams[i]->name, _configParams[i]->value);
+    _configParams[i]->updateValue(_server->arg(_configParams[i]->_name).c_str());
+    debug(_configParams[i]->_name, _configParams[i]->_value);
   }
   String page = FPSTR(HTTP_HEAD);
   page.replace("{v}", "Credentials Saved");
