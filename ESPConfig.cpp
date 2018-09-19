@@ -22,7 +22,8 @@ void ESPConfigParam::updateValue (const char *v) {
 }
 
 ESPConfig::ESPConfig() {
-    _configParams = (ESPConfigParam**)malloc(PARAMS_COUNT * sizeof(ESPConfigParam*));
+    _max_params = WIFI_MANAGER_MAX_PARAMS
+    _configParams = (ESPConfigParam**)malloc(_max_params * sizeof(ESPConfigParam*));
 }
 
 ESPConfig::~ESPConfig() {
@@ -69,7 +70,8 @@ bool ESPConfig::startConfigPortal() {
       debug(F("Connecting to new AP"));
       // using user-provided  _ssid, _pass in place of system-stored ssid and pass
       //end the led feedback
-      if (_feedbackPin != -1) {
+      if (_feedbackPin != INVALID_PIN_NO) {
+        //stop feedback
         digitalWrite(_feedbackPin, LOW);
       }
       if (connectWifi(_server->arg("s").c_str(), _server->arg("p").c_str()) != WL_CONNECTED) {
@@ -78,11 +80,16 @@ bool ESPConfig::startConfigPortal() {
       } else {
         WiFi.mode(WIFI_STA);
         //notify that configuration has changed and any optional parameters should be saved
-        saveConfig();
+        if ( _savecallback != NULL) {
+          //todo: check if any custom parameters actually exist, and check if they really changed maybe
+          _savecallback();
+        }
         break;
       }
     }
-    signalFeedback(LED_PIN, 1000);
+    if (_feedbackPin != INVALID_PIN_NO) {
+      nonBlockingFeedback(_feedbackPin, 1000);
+    }
     yield();
   }
   _server.reset();
@@ -102,7 +109,7 @@ void ESPConfig::setMinimumSignalQuality(int quality) {
     _minimumQuality = quality;
 }
 
-void ESPConfig::setDebugOutput(boolean debug) {
+void ESPConfig::setDebugOutput(bool debug) {
   _debug = debug;
 }
 
@@ -137,8 +144,7 @@ bool ESPConfig::addParameter(ESPConfigParam *p) {
   return true;
 }
 
-/* Blocking signal feedback. Turns on/off a signal a specific times waiting a step time for each state flip */
-void ESPConfig::signalFeedback (uint8_t pin, long stepTime, uint8_t times) {
+void ESPConfig::blockingFeedback (uint8_t pin, long stepTime, uint8_t times) {
   for (uint8_t i = 0; i < times; ++i) {
     digitalWrite(pin, HIGH);
     delay(stepTime);
@@ -147,8 +153,7 @@ void ESPConfig::signalFeedback (uint8_t pin, long stepTime, uint8_t times) {
   }
 }
 
-/* Non blocking signal feedback (to be used inside a loop). Uses global variables to control when to flip the signal state according to the step time. */
-void ESPConfig::signalFeedback(uint8_t pin, int stepTime) {
+void ESPConfig::nonBlockingFeedback(uint8_t pin, int stepTime) {
   if (millis() > _sigfbkStepControl + stepTime) {
     _sigfbkIsOn = !_sigfbkIsOn;
     _sigfbkStepControl = millis();

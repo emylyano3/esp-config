@@ -24,6 +24,9 @@ const char HTTP_SCAN_LINK[] PROGMEM                 = "<br/><div class=\"c\"><a 
 const char HTTP_SAVED[] PROGMEM                     = "<div>Credentials Saved<br/>Trying to connect ESP to network.<br/>If it fails reconnect to AP to try again</div>";
 const char HTTP_END[] PROGMEM                       = "</div></body></html>";
 
+#ifndef INVALID_PIN_NO
+#define INVALID_PIN_NO 127
+#endif
 #ifndef ESP_CONFIG_MAX_PARAMS
 #define ESP_CONFIG_MAX_PARAMS 10
 #endif
@@ -83,10 +86,10 @@ class ESPConfig {
         void    setMinimumSignalQuality(int quality = 8);
 
         // Blocking signal feedback. Turns on/off a signal a specific times waiting a step time for each state flip.
-        void    signalFeedback (uint8_t pin, long stepTime, uint8_t times);
+        void    blockingFeedback (uint8_t pin, long stepTime, uint8_t times);
 
         // Non blocking signal feedback (to be used inside a loop). Uses global variables to control when to flip the signal state according to the step time.
-        void    signalFeedback(uint8_t pin, int stepTime);
+        void    nonBlockingFeedback(uint8_t pin, int stepTime);
 
     private:
 
@@ -100,7 +103,7 @@ class ESPConfig {
         uint8_t         _max_params;
         bool            _connect;
         bool            _debug              = true;
-        uint8_t         _feedbackPin        = -1;
+        uint8_t         _feedbackPin        = INVALID_PIN_NO;
 
         uint8_t     connectWifi(String ssid, String pass);
         uint8_t     connectWiFi();
@@ -110,9 +113,9 @@ class ESPConfig {
         unsigned long   _connectionTimeout;
         
         // Signal feedback
-        bool            _sigfbkIsOn           = false;
-        unsigned long   _sigfbkStepControl    = 0;
-        ESPConfigParam**   _configParams;
+        bool                _sigfbkIsOn           = false;
+        unsigned long       _sigfbkStepControl    = 0;
+        ESPConfigParam**    _configParams;
 
         /* Callbacks */
         void    (*_apcallback)(ESPConfig*)          = NULL;
@@ -120,7 +123,7 @@ class ESPConfig {
         char*   (*_getStationNameCallback)(void)    = NULL;
         
         void        handleRoot();
-        void        handleWifi(boolean scan);
+        void        handleWifi(bool scan);
         void        handleWifiSave();
         void        handleInfo();
         void        handleReset();
