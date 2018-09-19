@@ -30,9 +30,9 @@ ESPConfig::~ESPConfig() {
     if (_configParams != NULL) {
         debug(F("Freeing allocated params!"));
         // for (uint8_t i = 0; i < PARAMS_COUNT; ++i) {
-        //     _configParams[i]->_name = NULL;
-        //     _configParams[i]->_label = NULL;
-        //     _configParams[i]->_customHTML = NULL;
+        //     _configParams[i]->getName() = NULL;
+        //     _configParams[i]->getLabel() = NULL;
+        //     _configParams[i]->getCustomHTML() = NULL;
         // }
         free(_configParams);
     }
@@ -328,30 +328,30 @@ void ESPConfig::handleWifi(bool scan) {
   char parLength[5];
   // add the extra parameters to the form
   for (int i = 0; i < PARAMS_COUNT; i++) {
-    if (_configParams[i]->_name != NULL) {
+    if (_configParams[i]->getName() != NULL) {
       if (_configParams[i]->_type == Combo) {
         String pitem = FPSTR(HTTP_FORM_INPUT_LIST);
-        pitem.replace("{i}", _configParams[i]->_name);
-        pitem.replace("{n}", _configParams[i]->_name);
+        pitem.replace("{i}", _configParams[i]->getName());
+        pitem.replace("{n}", _configParams[i]->getName());
         String ops = "";
         for (size_t j = 0; j < _configParams[i]->_options.size(); ++j) {
           String op = FPSTR(HTTP_FORM_INPUT_LIST_OPTION);
-          op.replace("{o}", _configParams[i]->_options[j]);
+          op.replace("{o}", _configParams[i]->getOptions();
           ops.concat(op);
         }
-        pitem.replace("{p}", _configParams[i]->_label);
+        pitem.replace("{p}", _configParams[i]->getLabel());
         pitem.replace("{o}", ops);
-        pitem.replace("{c}", _configParams[i]->_customHTML);
+        pitem.replace("{c}", _configParams[i]->getCustomHTML());
         page += pitem;
       } else {
         String pitem = FPSTR(HTTP_FORM_INPUT);
-        pitem.replace("{i}", _configParams[i]->_name);
-        pitem.replace("{n}", _configParams[i]->_name);
-        pitem.replace("{p}", _configParams[i]->_label);
-        snprintf(parLength, 5, "%d", _configParams[i]->_length);
+        pitem.replace("{i}", _configParams[i]->getName());
+        pitem.replace("{n}", _configParams[i]->getName());
+        pitem.replace("{p}", _configParams[i]->getLabel());
+        snprintf(parLength, 5, "%d", _configParams[i]->getValueLength());
         pitem.replace("{l}", parLength);
-        pitem.replace("{v}", _configParams[i]->_value);
-        pitem.replace("{c}", _configParams[i]->_customHTML);
+        pitem.replace("{v}", _configParams[i]->getValue());
+        pitem.replace("{c}", _configParams[i]->getCustomHTML());
         page += pitem;
       }
     } 
@@ -390,8 +390,8 @@ void ESPConfig::handleNotFound() {
 /** Handle the WLAN save form and redirect to WLAN config page again */
 void ESPConfig::handleWifiSave() {
   for (int i = 0; i < PARAMS_COUNT; i++) {
-    _configParams[i]->updateValue(_server->arg(_configParams[i]->_name).c_str());
-    debug(_configParams[i]->_name, _configParams[i]->_value);
+    _configParams[i]->updateValue(_server->arg(_configParams[i]->getName()).c_str());
+    debug(_configParams[i]->getName(), _configParams[i]->getValue());
   }
   String page = FPSTR(HTTP_HEAD);
   page.replace("{v}", "Credentials Saved");

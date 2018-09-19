@@ -40,12 +40,14 @@ class ESPConfigParam {
         ESPConfigParam (InputType type, const char* name, const char* label, const char* defVal, uint8_t length, const char* html);
         ~ESPConfigParam();
 
-        const char* getName();
-        const char* getValue();
-        const char* getPlaceholder();
-        int         getValueLength();
-        const char* getCustomHTML();
-        void        updateValue(const char *v);
+        const char*         getName();
+        const char*         getValue();
+        const char*         getLabel();
+        int                 getValueLength();
+        const char*         getCustomHTML();
+        std::vector<char*>  getOptions();
+
+        void                updateValue(const char *v);
 
     private:
         const char*         _name;       // identificador
