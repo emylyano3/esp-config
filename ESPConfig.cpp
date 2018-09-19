@@ -274,9 +274,9 @@ void ESPConfig::setupConfigPortal() {
   _dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
   _dnsServer->start(DNS_PORT, "*", WiFi.softAPIP());
   /* Setup web pages */
-  _server->on("/", std::bind(&ESPConfig::handleWifi, false));
-  _server->on("/config", std::bind(&ESPConfig::handleWifi, false));
-  _server->on("/scan", std::bind(&ESPConfig::handleWifi, true)); 
+  _server->on("/", std::bind(&ESPConfig::handleWifi, this, false));
+  _server->on("/config", std::bind(&ESPConfig::handleWifi, this, false));
+  _server->on("/scan", std::bind(&ESPConfig::handleWifi, this, true)); 
   _server->on("/wifisave", std::bind(&ESPConfig::handleWifiSave, this));
   _server->onNotFound(std::bind(&ESPConfig::handleNotFound, this));
   _server->begin();
