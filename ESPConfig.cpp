@@ -16,6 +16,34 @@ ESPConfigParam::~ESPConfigParam() {
   }
 }
 
+InputType ESPConfigParam::getType() {
+  return _type;
+}
+
+const char* ESPConfigParam::getName() {
+  return _name;
+}
+
+const char* ESPConfigParam::getValue() {
+  return _value;
+}
+
+const char* ESPConfigParam::getLabel() {
+  return _label;
+}
+
+int ESPConfigParam::getValueLength() {
+  return _length;
+}
+
+const char* ESPConfigParam::getCustomHTML() {
+  return _customHTML;
+}
+
+std::vector<char*> ESPConfigParam::getOptions() {
+  return _options;
+}
+
 void ESPConfigParam::updateValue (const char *v) {
   String s = String(v);
   s.toCharArray(_value, _length);
@@ -29,7 +57,7 @@ ESPConfig::ESPConfig() {
 ESPConfig::~ESPConfig() {
     if (_configParams != NULL) {
         debug(F("Freeing allocated params!"));
-        // for (uint8_t i = 0; i < PARAMS_COUNT; ++i) {
+        // for (uint8_t i = 0; i < _paramsCount; ++i) {
         //     _configParams[i]->getName() = NULL;
         //     _configParams[i]->getLabel() = NULL;
         //     _configParams[i]->getCustomHTML() = NULL;
@@ -327,14 +355,14 @@ void ESPConfig::handleWifi(bool scan) {
   page += FPSTR(HTTP_FORM_START);
   char parLength[5];
   // add the extra parameters to the form
-  for (int i = 0; i < PARAMS_COUNT; i++) {
+  for (int i = 0; i < _paramsCount; i++) {
     if (_configParams[i]->getName() != NULL) {
-      if (_configParams[i]->_type == Combo) {
+      if (_configParams[i]->getType() == Combo) {
         String pitem = FPSTR(HTTP_FORM_INPUT_LIST);
         pitem.replace("{i}", _configParams[i]->getName());
         pitem.replace("{n}", _configParams[i]->getName());
         String ops = "";
-        for (size_t j = 0; j < _configParams[i]->_options.size(); ++j) {
+        for (size_t j = 0; j < _configParams[i]->getOptions().size(); ++j) {
           String op = FPSTR(HTTP_FORM_INPUT_LIST_OPTION);
           op.replace("{o}", _configParams[i]->getOptions();
           ops.concat(op);
@@ -389,7 +417,7 @@ void ESPConfig::handleNotFound() {
 
 /** Handle the WLAN save form and redirect to WLAN config page again */
 void ESPConfig::handleWifiSave() {
-  for (int i = 0; i < PARAMS_COUNT; i++) {
+  for (int i = 0; i < _paramsCount; i++) {
     _configParams[i]->updateValue(_server->arg(_configParams[i]->getName()).c_str());
     debug(_configParams[i]->getName(), _configParams[i]->getValue());
   }
