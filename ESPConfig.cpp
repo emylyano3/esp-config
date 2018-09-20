@@ -121,7 +121,7 @@ bool ESPConfig::startConfigPortal() {
   return  WiFi.status() == WL_CONNECTED;
 }
 
-void ESPConfig::setTimeout(unsigned long seconds) {
+void ESPConfig::setConnectionTimeout(unsigned long seconds) {
   _connectionTimeout = seconds;
 }
 

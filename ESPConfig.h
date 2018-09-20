@@ -69,7 +69,7 @@ class ESPConfig {
         bool            startConfigPortal();
 
         /* setup methods */
-        void            setTimeout(unsigned long seconds);
+        void            setConnectionTimeout(unsigned long seconds);
         void            setPortalSSID(const char *apName);
         void            setPortalPassword(const char *apPass);
         bool            addParameter(ESPConfigParam *p);
