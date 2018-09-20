@@ -50,20 +50,20 @@ void ESPConfigParam::updateValue (const char *v) {
 }
 
 ESPConfig::ESPConfig() {
-    _max_params = ESP_CONFIG_MAX_PARAMS;
-    _configParams = (ESPConfigParam**)malloc(_max_params * sizeof(ESPConfigParam*));
+  _max_params = ESP_CONFIG_MAX_PARAMS;
+  _configParams = (ESPConfigParam**)malloc(_max_params * sizeof(ESPConfigParam*));
 }
 
 ESPConfig::~ESPConfig() {
-    if (_configParams != NULL) {
-        debug(F("Freeing allocated params!"));
-        // for (uint8_t i = 0; i < _paramsCount; ++i) {
-        //     _configParams[i]->getName() = NULL;
-        //     _configParams[i]->getLabel() = NULL;
-        //     _configParams[i]->getCustomHTML() = NULL;
-        // }
-        free(_configParams);
-    }
+  if (_configParams != NULL) {
+    debug(F("Freeing allocated params!"));
+    // for (uint8_t i = 0; i < _paramsCount; ++i) {
+    //     _configParams[i]->getName() = NULL;
+    //     _configParams[i]->getLabel() = NULL;
+    //     _configParams[i]->getCustomHTML() = NULL;
+    // }
+    free(_configParams);
+  }
 }
 
 void ESPConfig::connectWifiNetwork (bool existsConfig) {
@@ -71,13 +71,13 @@ void ESPConfig::connectWifiNetwork (bool existsConfig) {
   bool connected = false;
   while (!connected) {
     if (existsConfig) {
-        debug(F("Connecting to saved network"));
-        if (connectWiFi() == WL_CONNECTED) {
-          connected = true;
-        } else {
-          debug(F("Could not connect to saved network. Going into config mode."));
-          connected = startConfigPortal();
-        }
+      debug(F("Connecting to saved network"));
+      if (connectWiFi() == WL_CONNECTED) {
+        connected = true;
+      } else {
+        debug(F("Could not connect to saved network. Going into config mode."));
+        connected = startConfigPortal();
+      }
     } else {
       debug(F("Going into config mode cause no config was found"));
       connected = startConfigPortal();
@@ -158,7 +158,7 @@ void ESPConfig::setStationNameCallback(char* (*func)(void)) {
 }
 
 bool ESPConfig::addParameter(ESPConfigParam *p) {
-  if(_paramsCount + 1 > _max_params) {
+  if (_paramsCount + 1 > _max_params) {
     // rezise the params array
     _max_params += ESP_CONFIG_MAX_PARAMS;
     debug(F("Increasing _max_params to:"), _max_params);
@@ -442,7 +442,7 @@ bool ESPConfig::captivePortal() {
   if (!isIp(_server->hostHeader()) ) {
     debug(F("Request redirected to captive portal"));
     _server->sendHeader("Location", String("http://") + toStringIp(_server->client().localIP()), true);
-    _server->send ( 302, "text/plain", ""); // Empty content inhibits Content-length header so we have to close the socket ourselves.
+    _server->send(302, "text/plain", ""); // Empty content inhibits Content-length header so we have to close the socket ourselves.
     _server->client().stop(); // Stop is needed because we sent no content length
     return true;
   }
