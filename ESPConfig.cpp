@@ -58,11 +58,6 @@ ESPConfig::ESPConfig() {
 ESPConfig::~ESPConfig() {
   if (_configParams != NULL) {
     debug(F("Freeing allocated params!"));
-    // for (uint8_t i = 0; i < _paramsCount; ++i) {
-    //     _configParams[i]->getName() = NULL;
-    //     _configParams[i]->getLabel() = NULL;
-    //     _configParams[i]->getCustomHTML() = NULL;
-    // }
     free(_configParams);
   }
 }
@@ -144,6 +139,12 @@ void ESPConfig::setMinimumSignalQuality(int quality) {
 
 void ESPConfig::setDebugOutput(bool debug) {
   _debug = debug;
+}
+
+void ESPConfig::setAPStaticIP(IPAddress ip, IPAddress gw, IPAddress sn) {
+  _ap_static_ip = ip;
+  _ap_static_gw = gw;
+  _ap_static_sn = sn;
 }
 
 void ESPConfig::setFeedbackPin(uint8_t pin) {
@@ -276,7 +277,10 @@ void ESPConfig::setupConfigPortal() {
     }
     debug(_apPass);
   }
-  WiFi.softAPConfig(IPAddress(10,10,10,10),IPAddress(IPAddress(10,10,10,10)),IPAddress(IPAddress(255,255,255,0)));
+  if (_ap_static_ip) {
+    debug(F("Custom AP IP/GW/Subnet"));
+    WiFi.softAPConfig(_ap_static_ip, _ap_static_gw, _ap_static_sn);
+  }
   if (_apPass != NULL) {
     WiFi.softAP(_apName, _apPass);
   } else {
@@ -483,11 +487,11 @@ String ESPConfig::toStringIp(IPAddress ip) {
 int ESPConfig::getRSSIasQuality(int RSSI) {
   int quality = 0;
   if (RSSI <= -100) {
-      quality = 0;
+    quality = 0;
   } else if (RSSI >= -50) {
-      quality = 100;
+    quality = 100;
   } else {
-      quality = 2 * (RSSI + 100);
+    quality = 2 * (RSSI + 100);
   }
   return quality;
 }

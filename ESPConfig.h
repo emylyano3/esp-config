@@ -75,6 +75,7 @@ class ESPConfig {
         bool            addParameter(ESPConfigParam *p);
         void            setDebugOutput(bool debug);
         void            setFeedbackPin(uint8_t pin);
+        void            setAPStaticIP(IPAddress ip, IPAddress gw, IPAddress sn);
         
         // Returns the param under the specified index
         ESPConfigParam *getParameter(uint8_t index);
@@ -113,17 +114,22 @@ class ESPConfig {
 
         const uint8_t   DNS_PORT            = 53;
 
-        uint8_t     connectWifi(String ssid, String pass);
-        uint8_t     connectWiFi();
-        uint8_t     waitForConnectResult();
-        void        setupConfigPortal();
+        uint8_t connectWifi(String ssid, String pass);
+        uint8_t connectWiFi();
+        uint8_t waitForConnectResult();
+        void    setupConfigPortal();
 
-        unsigned long   _connectionTimeout;
+        unsigned long       _connectionTimeout;
         
         // Signal feedback
         bool                _sigfbkIsOn           = false;
         unsigned long       _sigfbkStepControl    = 0;
         ESPConfigParam**    _configParams;
+
+        
+        IPAddress           _ap_static_ip;
+        IPAddress           _ap_static_gw;
+        IPAddress           _ap_static_sn;
 
         /* Callbacks */
         void    (*_apcallback)(ESPConfig*)          = NULL;
