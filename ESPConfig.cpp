@@ -52,6 +52,7 @@ void ESPConfigParam::updateValue (const char *v) {
 ESPConfig::ESPConfig() {
   _max_params = ESP_CONFIG_MAX_PARAMS;
   _configParams = (ESPConfigParam**)malloc(_max_params * sizeof(ESPConfigParam*));
+  _apName = String(ESP.getChipId()).c_str();
 }
 
 ESPConfig::~ESPConfig() {
@@ -267,9 +268,7 @@ uint8_t ESPConfig::waitForConnectResult() {
 void ESPConfig::setupConfigPortal() {
   _server.reset(new ESP8266WebServer(80));
   _dnsServer.reset(new DNSServer());
-  String id = String(ESP.getChipId());
-  const char* apName = id.c_str();
-  debug(F("Configuring access point... "), apName);
+  debug(F("Configuring access point... "), _apName);
   if (_apPass != NULL) {
     if (strlen(_apPass) < 8 || strlen(_apPass) > 63) {
       debug(F("Invalid AccessPoint password. Ignoring"));
@@ -279,9 +278,9 @@ void ESPConfig::setupConfigPortal() {
   }
   WiFi.softAPConfig(IPAddress(10,10,10,10),IPAddress(IPAddress(10,10,10,10)),IPAddress(IPAddress(255,255,255,0)));
   if (_apPass != NULL) {
-    WiFi.softAP(apName, _apPass);
+    WiFi.softAP(_apName, _apPass);
   } else {
-    WiFi.softAP(apName);
+    WiFi.softAP(_apName);
   }
   // Without delay I've seen the IP address blank
   delay(500); 
