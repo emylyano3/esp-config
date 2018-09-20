@@ -65,17 +65,20 @@ class ESPConfig {
         ESPConfig();
         ~ESPConfig();
 
-        void    connectWifiNetwork(bool existConfig);
-        bool    startConfigPortal();
+        void            connectWifiNetwork(bool existConfig);
+        bool            startConfigPortal();
 
         /* setup methods */
-        void    setTimeout(unsigned long seconds);
-        void    setPortalSSID(const char *apName);
-        void    setPortalPassword(const char *apPass);
-        bool    addParameter(ESPConfigParam *p);
-        void    setDebugOutput(bool debug);
-        void    setFeedbackPin(uint8_t pin);
+        void            setTimeout(unsigned long seconds);
+        void            setPortalSSID(const char *apName);
+        void            setPortalPassword(const char *apPass);
+        bool            addParameter(ESPConfigParam *p);
+        void            setDebugOutput(bool debug);
+        void            setFeedbackPin(uint8_t pin);
         
+        // Returns the param under the specified index
+        ESPConfigParam *getParameter(uint8_t index);
+
         //called when AP mode and config portal is started
         void    setAPCallback( void (*func)(ESPConfig*) );
         

@@ -145,6 +145,10 @@ void ESPConfig::setDebugOutput(bool debug) {
   _debug = debug;
 }
 
+void ESPConfig::setFeedbackPin(uint8_t pin) {
+  _feedbackPin = pin;
+}
+
 void ESPConfig::setAPCallback( void (*func)(ESPConfig* myESPConfig) ) {
   _apcallback = func;
 }
@@ -155,6 +159,14 @@ void ESPConfig::setSaveConfigCallback( void (*func)(void) ) {
 
 void ESPConfig::setStationNameCallback(char* (*func)(void)) {
   _getStationNameCallback = func;
+}
+
+ESPConfigParam* ESPConfig::getParameter(uint8_t index) {
+  if (index >= _paramsCount) {
+    return NULL;
+  } else {
+    return _configParams[index];
+  }
 }
 
 bool ESPConfig::addParameter(ESPConfigParam *p) {
