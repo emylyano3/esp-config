@@ -8,7 +8,7 @@ ESPConfigParam param2 (Text, "mqtt_port", "MQTT Port", "1883", 6, "required");
 const uint8_t LED_PIN = 2;
 
 void setup() {
-    moduleConfig.setTimeout(30000);
+    moduleConfig.setConnectionTimeout(30000);
     moduleConfig.setPortalSSID("ConfigTesting");
     moduleConfig.setPortalPassword("mistery");
     moduleConfig.addParameter(&param1);
