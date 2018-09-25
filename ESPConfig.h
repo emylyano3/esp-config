@@ -84,22 +84,22 @@ class ESPConfig {
         uint8_t         getParamsCount();
 
         //called when AP mode and config portal is started
-        void    setAPCallback( void (*func)(ESPConfig*) );
+        void    setAPCallback (void (*func)(ESPConfig*));
         
         //called when connecting station to AP
-        void    setStationNameCallback(char* (*func)(void));
+        void    setStationNameCallback( char* (*func)(void));
         
         //called when settings have been changed and connection was successful
-        void    setSaveConfigCallback( void (*func)(void) );
+        void    setSaveConfigCallback (void (*func)(void));
         
         //defaults to not showing anything under 8% signal quality if called
-        void    setMinimumSignalQuality(int quality = 8);
+        void    setMinimumSignalQuality (int quality = 8);
 
         // Blocking signal feedback. Turns on/off a signal a specific times waiting a step time for each state flip.
         void    blockingFeedback (uint8_t pin, long stepTime, uint8_t times);
 
         // Non blocking signal feedback (to be used inside a loop). Uses global variables to control when to flip the signal state according to the step time.
-        void    nonBlockingFeedback(uint8_t pin, int stepTime);
+        void    nonBlockingFeedback (uint8_t pin, int stepTime);
 
     private:
 
