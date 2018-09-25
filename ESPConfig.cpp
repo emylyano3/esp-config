@@ -151,8 +151,8 @@ void ESPConfig::setFeedbackPin(uint8_t pin) {
   _feedbackPin = pin;
 }
 
-void ESPConfig::setAPCallback( void (*func)(ESPConfig* myESPConfig) ) {
-  _apcallback = func;
+void ESPConfig::setAPCallback (std::function<void(ESPConfig* espConfig)> callback) {
+  _apcallback = callback;
 }
 
 void ESPConfig::setSaveConfigCallback (std::function<void(void)> callback) {

@@ -84,7 +84,7 @@ class ESPConfig {
         uint8_t         getParamsCount();
 
         //called when AP mode and config portal is started
-        void    setAPCallback (void (*func)(ESPConfig*));
+        void    setAPCallback (std::function<void(ESPConfig*)> callback);
         
         //called when connecting station to AP
         void    setStationNameCallback (std::function<char*(void)> callback);
@@ -128,18 +128,15 @@ class ESPConfig {
         bool                _sigfbkIsOn           = false;
         unsigned long       _sigfbkStepControl    = 0;
         ESPConfigParam**    _configParams;
-
         
         IPAddress           _ap_static_ip;
         IPAddress           _ap_static_gw;
         IPAddress           _ap_static_sn;
 
         /* Callbacks */
-        void        (*_apcallback)(ESPConfig*)          = NULL;
-        char*       (*_getStationNameCallback)(void)    = NULL;
-        
-        std::function<char*(void)>  _stationNameCallback;
-        std::function<void(void)>   _savecallback;
+        std::function<void(ESPConfig*)>     _apcallback;
+        std::function<char*(void)>          _stationNameCallback;
+        std::function<void(void)>           _savecallback;
         
         void        handleRoot();
         void        handleWifi(bool scan);

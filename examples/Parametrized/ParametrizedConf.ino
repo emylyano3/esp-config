@@ -15,6 +15,7 @@ void setup() {
     moduleConfig.addParameter(&_param2);
     moduleConfig.getParamsCount();
     moduleConfig.setStationNameCallback(stationName);
+    moduleConfig.setAPCallback(apCallback);
     moduleConfig.setSaveConfigCallback(saveConfig);
     moduleConfig.connectWifiNetwork(false);
     moduleConfig.blockingFeedback(LED_PIN, 500, 5);
@@ -22,6 +23,10 @@ void setup() {
 
 void loop() {
 
+}
+
+void apCallback (ESPConfig* espConfig) {
+    espConfig->getParamsCount();
 }
 
 char* stationName() {
