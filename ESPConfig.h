@@ -90,7 +90,7 @@ class ESPConfig {
         void    setStationNameCallback( char* (*func)(void));
         
         //called when settings have been changed and connection was successful
-        void    setSaveConfigCallback (void (*func)(void));
+        void    setSaveConfigCallback (std::function<void(void)> callback);
         
         //defaults to not showing anything under 8% signal quality if called
         void    setMinimumSignalQuality (int quality = 8);
@@ -135,9 +135,10 @@ class ESPConfig {
         IPAddress           _ap_static_sn;
 
         /* Callbacks */
-        void    (*_apcallback)(ESPConfig*)          = NULL;
-        void    (*_savecallback)(void)              = NULL;
-        char*   (*_getStationNameCallback)(void)    = NULL;
+        void        (*_apcallback)(ESPConfig*)          = NULL;
+        char*       (*_getStationNameCallback)(void)    = NULL;
+        
+        std::function<void(void)>   _savecallback;
         
         void        handleRoot();
         void        handleWifi(bool scan);

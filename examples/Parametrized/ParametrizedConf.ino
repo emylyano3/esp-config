@@ -15,6 +15,7 @@ void setup() {
     moduleConfig.addParameter(&_param2);
     moduleConfig.getParamsCount();
     moduleConfig.setStationNameCallback(stationName);
+    moduleConfig.setSaveConfigCallback(saveConfig);
     moduleConfig.connectWifiNetwork(false);
     moduleConfig.blockingFeedback(LED_PIN, 500, 5);
 }
@@ -25,4 +26,7 @@ void loop() {
 
 char* stationName() {
     return _stationName;
+}
+
+void saveConfig() {
 }

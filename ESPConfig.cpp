@@ -155,8 +155,8 @@ void ESPConfig::setAPCallback( void (*func)(ESPConfig* myESPConfig) ) {
   _apcallback = func;
 }
 
-void ESPConfig::setSaveConfigCallback( void (*func)(void) ) {
-  _savecallback = func;
+void ESPConfig::setSaveConfigCallback (std::function<void(void)> callback) {
+  _savecallback = callback;
 }
 
 void ESPConfig::setStationNameCallback(char* (*func)(void)) {
