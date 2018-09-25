@@ -80,6 +80,9 @@ class ESPConfig {
         // Returns the param under the specified index
         ESPConfigParam *getParameter(uint8_t index);
 
+        // Returns the numer of params existing
+        uint8_t         getParamsCount();
+
         //called when AP mode and config portal is started
         void    setAPCallback( void (*func)(ESPConfig*) );
         

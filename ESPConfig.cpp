@@ -171,6 +171,10 @@ ESPConfigParam* ESPConfig::getParameter(uint8_t index) {
   }
 }
 
+uint8_t ESPConfig::getParamsCount() {
+  return _paramsCount;
+}
+
 bool ESPConfig::addParameter(ESPConfigParam *p) {
   if (_paramsCount + 1 > _max_params) {
     // rezise the params array
