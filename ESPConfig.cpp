@@ -159,8 +159,8 @@ void ESPConfig::setSaveConfigCallback (std::function<void(void)> callback) {
   _savecallback = callback;
 }
 
-void ESPConfig::setStationNameCallback(char* (*func)(void)) {
-  _getStationNameCallback = func;
+void ESPConfig::setStationNameCallback(std::function<char*(void)> callback) {
+  _stationNameCallback = callback;
 }
 
 ESPConfigParam* ESPConfig::getParameter(uint8_t index) {
@@ -217,8 +217,8 @@ uint8_t ESPConfig::connectWifi(String ssid, String pass) {
     debug(F("Already connected. Bailing out."));
     return WL_CONNECTED;
   }
-  if (_getStationNameCallback) {
-    WiFi.hostname(_getStationNameCallback());
+  if (_stationNameCallback) {
+    WiFi.hostname(_stationNameCallback());
   }
   WiFi.begin(ssid.c_str(), pass.c_str());
   return waitForConnectResult();
@@ -226,8 +226,8 @@ uint8_t ESPConfig::connectWifi(String ssid, String pass) {
 
 uint8_t ESPConfig::connectWiFi() {
   WiFi.mode(WIFI_STA);
-  if (_getStationNameCallback) {
-    WiFi.hostname(_getStationNameCallback());
+  if (_stationNameCallback) {
+    WiFi.hostname(_stationNameCallback());
   }
   if (WiFi.SSID()) {
     debug(F("Using last saved values, should be faster"));

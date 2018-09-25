@@ -87,7 +87,7 @@ class ESPConfig {
         void    setAPCallback (void (*func)(ESPConfig*));
         
         //called when connecting station to AP
-        void    setStationNameCallback( char* (*func)(void));
+        void    setStationNameCallback (std::function<char*(void)> callback);
         
         //called when settings have been changed and connection was successful
         void    setSaveConfigCallback (std::function<void(void)> callback);
@@ -138,6 +138,7 @@ class ESPConfig {
         void        (*_apcallback)(ESPConfig*)          = NULL;
         char*       (*_getStationNameCallback)(void)    = NULL;
         
+        std::function<char*(void)>  _stationNameCallback;
         std::function<void(void)>   _savecallback;
         
         void        handleRoot();
