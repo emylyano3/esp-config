@@ -87,7 +87,7 @@ class ESPConfig {
         void    setAPCallback (std::function<void(ESPConfig*)> callback);
         
         //called when connecting station to AP
-        void    setStationNameCallback (std::function<char*(void)> callback);
+        void    setStationNameCallback (std::function<const char*(void)> callback);
         
         //called when settings have been changed and connection was successful
         void    setSaveConfigCallback (std::function<void(void)> callback);
@@ -109,7 +109,7 @@ class ESPConfig {
         const char*     _apName             = "ESP-Module";
         const char*     _apPass             = NULL;
         int             _minimumQuality     = -1;
-        uint8_t         _paramsCount;
+        uint8_t         _paramsCount        = 0;
         uint8_t         _max_params;
         bool            _connect;
         bool            _debug              = true;
@@ -135,7 +135,7 @@ class ESPConfig {
 
         /* Callbacks */
         std::function<void(ESPConfig*)>     _apcallback;
-        std::function<char*(void)>          _stationNameCallback;
+        std::function<const char*(void)>    _stationNameCallback;
         std::function<void(void)>           _savecallback;
         
         void        handleRoot();

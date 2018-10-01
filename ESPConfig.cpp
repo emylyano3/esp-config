@@ -159,7 +159,7 @@ void ESPConfig::setSaveConfigCallback (std::function<void(void)> callback) {
   _savecallback = callback;
 }
 
-void ESPConfig::setStationNameCallback(std::function<char*(void)> callback) {
+void ESPConfig::setStationNameCallback(std::function<const char*(void)> callback) {
   _stationNameCallback = callback;
 }
 
