@@ -25,8 +25,9 @@ const char HTTP_SAVED[] PROGMEM                     = "<div>Credentials Saved<br
 const char HTTP_END[] PROGMEM                       = "</div></body></html>";
 
 #ifndef INVALID_PIN_NO
-#define INVALID_PIN_NO 127
+#define INVALID_PIN_NO 255
 #endif
+
 #ifndef ESP_CONFIG_MAX_PARAMS
 #define ESP_CONFIG_MAX_PARAMS 10
 #endif
