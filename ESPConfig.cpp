@@ -502,14 +502,14 @@ int ESPConfig::getRSSIasQuality(int RSSI) {
 
 template <class T> void ESPConfig::debug (T text) {
   if (_debug) {
-    Serial.print("*ESPC: ");
+    Serial.print("*CONF: ");
     Serial.println(text);
   }
 }
 
 template <class T, class U> void ESPConfig::debug (T key, U value) {
   if (_debug) {
-    Serial.print("*ESPC: ");
+    Serial.print("*CONF: ");
     Serial.print(key);
     Serial.print(": ");
     Serial.println(value);
