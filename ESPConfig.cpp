@@ -57,25 +57,35 @@ ESPConfig::ESPConfig() {
 
 ESPConfig::~ESPConfig() {
   if (_configParams != NULL) {
+    #ifdef LOGGING
     debug(F("Freeing allocated params!"));
+    #endif
     free(_configParams);
   }
 }
 
 void ESPConfig::connectWifiNetwork (bool existsConfig) {
+  #ifdef LOGGING
   debug(F("Connecting to wifi network"));
+  #endif
   bool connected = false;
   while (!connected) {
     if (existsConfig) {
+      #ifdef LOGGING
       debug(F("Connecting to saved network"));
+      #endif
       if (connectWiFi() == WL_CONNECTED) {
         connected = true;
       } else {
+        #ifdef LOGGING
         debug(F("Could not connect to saved network. Going into config mode."));
+        #endif
         connected = startConfigPortal();
       }
     } else {
+      #ifdef LOGGING
       debug(F("Going into config mode cause no config was found"));
+      #endif
       connected = startConfigPortal();
     }
   }
@@ -91,7 +101,9 @@ bool ESPConfig::startConfigPortal() {
     if (_connect) {
       _connect = false;
       delay(1000);
+      #ifdef LOGGING
       debug(F("Connecting to new AP"));
+      #endif
       // using user-provided  _ssid, _pass in place of system-stored ssid and pass
       //end the led feedback
       if (_feedbackPin != INVALID_PIN_NO) {
@@ -99,7 +111,9 @@ bool ESPConfig::startConfigPortal() {
         digitalWrite(_feedbackPin, LOW);
       }
       if (connectWifi(_server->arg("s").c_str(), _server->arg("p").c_str()) != WL_CONNECTED) {
+        #ifdef LOGGING
         debug(F("Failed to connect."));
+        #endif
         break;
       } else {
         WiFi.mode(WIFI_STA);
@@ -135,10 +149,6 @@ void ESPConfig::setPortalPassword(const char *apPass) {
 
 void ESPConfig::setMinimumSignalQuality(int quality) {
   _minimumQuality = quality;
-}
-
-void ESPConfig::setDebugOutput(bool debug) {
-  _debug = debug;
 }
 
 void ESPConfig::setAPStaticIP(IPAddress ip, IPAddress gw, IPAddress sn) {
@@ -179,18 +189,24 @@ bool ESPConfig::addParameter(ESPConfigParam *p) {
   if (_paramsCount + 1 > _max_params) {
     // rezise the params array
     _max_params += ESP_CONFIG_MAX_PARAMS;
+    #ifdef LOGGING
     debug(F("Increasing _max_params to:"), _max_params);
+    #endif
     ESPConfigParam** newParams = (ESPConfigParam**)realloc(_configParams, _max_params * sizeof(ESPConfigParam*));
     if (newParams != NULL) {
       _configParams = newParams;
     } else {
+      #ifdef LOGGING
       debug(F("ERROR: failed to realloc params, size not increased!"));
+      #endif
       return false;
     }
   }
   _configParams[_paramsCount] = p;
   _paramsCount++;
+  #ifdef LOGGING
   debug(F("Adding parameter"), p->getName());
+  #endif
   return true;
 }
 
@@ -212,9 +228,13 @@ void ESPConfig::nonBlockingFeedback(uint8_t pin, int stepTime) {
 }
 
 uint8_t ESPConfig::connectWifi(String ssid, String pass) {
+  #ifdef LOGGING
   debug(F("Connecting as wifi client..."));
+  #endif
   if (WiFi.status() == WL_CONNECTED) {
+    #ifdef LOGGING
     debug(F("Already connected. Bailing out."));
+    #endif
     return WL_CONNECTED;
   }
   if (_stationNameCallback) {
@@ -230,7 +250,9 @@ uint8_t ESPConfig::connectWiFi() {
     WiFi.hostname(_stationNameCallback());
   }
   if (WiFi.SSID()) {
+    #ifdef LOGGING
     debug(F("Using last saved values, should be faster"));
+    #endif
     //trying to fix connection in progress hanging
     ETS_UART_INTR_DISABLE();
     wifi_station_disconnect();
@@ -238,7 +260,9 @@ uint8_t ESPConfig::connectWiFi() {
     WiFi.begin();
     return waitForConnectResult();
   } else {
+    #ifdef LOGGING
     debug(F("No saved credentials"));
+    #endif
     return WL_CONNECT_FAILED;
   }
 }
@@ -247,21 +271,28 @@ uint8_t ESPConfig::waitForConnectResult() {
   if (_connectionTimeout == 0) {
     return WiFi.waitForConnectResult();
   } else {
-    debug(F("Waiting for connection result with time out"));
     unsigned long start = millis();
     bool keepConnecting = true;
-    uint8_t status, retry = 0;
+    uint8_t status;
+    #ifdef LOGGING
+    debug(F("Waiting for connection result with time out"));
+    uint8_t retry = 0;
+    #endif
     while (keepConnecting) {
       status = WiFi.status();
       if (millis() > start + _connectionTimeout) {
         keepConnecting = false;
+        #ifdef LOGGING
         debug(F("Connection timed out"));
+        #endif
       }
       if (status == WL_CONNECTED) {
         keepConnecting = false;
       } else if (status == WL_CONNECT_FAILED) {
+        #ifdef LOGGING
         debug(F("Connection failed. Retrying: "), ++retry);
         debug("Trying to begin connection again");
+        #endif
         WiFi.begin();
       }
       delay(100);
@@ -273,16 +304,24 @@ uint8_t ESPConfig::waitForConnectResult() {
 void ESPConfig::setupConfigPortal() {
   _server.reset(new ESP8266WebServer(80));
   _dnsServer.reset(new DNSServer());
+  #ifdef LOGGING
   debug(F("Configuring access point... "), _apName);
+  #endif
   if (_apPass != NULL) {
     if (strlen(_apPass) < 8 || strlen(_apPass) > 63) {
+      #ifdef LOGGING
       debug(F("Invalid AccessPoint password. Ignoring"));
+      #endif
       _apPass = NULL;
     }
+    #ifdef LOGGING
     debug(_apPass);
+    #endif
   }
   if (_ap_static_ip) {
+    #ifdef LOGGING
     debug(F("Custom AP IP/GW/Subnet"));
+    #endif
     WiFi.softAPConfig(_ap_static_ip, _ap_static_gw, _ap_static_sn);
   }
   if (_apPass != NULL) {
@@ -292,7 +331,9 @@ void ESPConfig::setupConfigPortal() {
   }
   // Without delay I've seen the IP address blank
   delay(500); 
+  #ifdef LOGGING
   debug(F("AP IP address"), WiFi.softAPIP());
+  #endif
   /* Setup the DNS server redirecting all the domains to the apIP */
   _dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
   _dnsServer->start(DNS_PORT, "*", WiFi.softAPIP());
@@ -303,7 +344,9 @@ void ESPConfig::setupConfigPortal() {
   _server->on("/wifisave", std::bind(&ESPConfig::handleWifiSave, this));
   _server->onNotFound(std::bind(&ESPConfig::handleNotFound, this));
   _server->begin();
+  #ifdef LOGGING
   debug(F("HTTP server started"));
+  #endif
 }
 
 void ESPConfig::handleWifi(bool scan) {
@@ -319,9 +362,13 @@ void ESPConfig::handleWifi(bool scan) {
   page += FPSTR(HTTP_HEAD_END);
   if (scan) {
     int n = WiFi.scanNetworks();
+    #ifdef LOGGING
     debug(F("Scan done"));
+    #endif
     if (n == 0) {
+      #ifdef LOGGING
       debug(F("No networks found"));
+      #endif
       page += F("No networks found. Refresh to scan again.");
     } else {
       //sort networks
@@ -344,7 +391,9 @@ void ESPConfig::handleWifi(bool scan) {
         cssid = WiFi.SSID(indices[i]);
         for (int j = i + 1; j < n; j++) {
           if (cssid == WiFi.SSID(indices[j])) {
+            #ifdef LOGGING
             debug("DUP AP: " + WiFi.SSID(indices[j]));
+            #endif
             indices[j] = -1; // set dup aps to index -1
           }
         }
@@ -352,8 +401,10 @@ void ESPConfig::handleWifi(bool scan) {
       //display networks in page
       for (int i = 0; i < n; i++) {
         if (indices[i] == -1) continue; // skip dups
+        #ifdef LOGGING
         debug(WiFi.SSID(indices[i]));
         debug(WiFi.RSSI(indices[i]));
+        #endif
         int quality = getRSSIasQuality(WiFi.RSSI(indices[i]));
         if (_minimumQuality == -1 || _minimumQuality < quality) {
           String item = FPSTR(HTTP_ITEM);
@@ -368,7 +419,9 @@ void ESPConfig::handleWifi(bool scan) {
           }
           page += item;
         } else {
+          #ifdef LOGGING
           debug(F("Skipping due to quality"));
+          #endif
         }
       }
       page += "<br/>";
@@ -411,7 +464,9 @@ void ESPConfig::handleWifi(bool scan) {
   page += FPSTR(HTTP_END);
   _server->sendHeader("Content-Length", String(page.length()));
   _server->send(200, "text/html", page);
+  #ifdef LOGGING
   debug(F("Sent config page"));
+  #endif
 }
 
 void ESPConfig::handleNotFound() {
@@ -441,7 +496,9 @@ void ESPConfig::handleNotFound() {
 void ESPConfig::handleWifiSave() {
   for (int i = 0; i < _paramsCount; i++) {
     _configParams[i]->updateValue(_server->arg(_configParams[i]->getName()).c_str());
+    #ifdef LOGGING
     debug(_configParams[i]->getName(), _configParams[i]->getValue());
+    #endif
   }
   String page = FPSTR(HTTP_HEAD);
   page.replace("{v}", "Credentials Saved");
@@ -459,7 +516,9 @@ void ESPConfig::handleWifiSave() {
 /** Redirect to captive portal if we got a request for another domain. Return true in that case so the page handler do not try to handle the request again. */
 bool ESPConfig::captivePortal() {
   if (!isIp(_server->hostHeader()) ) {
+    #ifdef LOGGING
     debug(F("Request redirected to captive portal"));
+    #endif
     _server->sendHeader("Location", String("http://") + toStringIp(_server->client().localIP()), true);
     _server->send(302, "text/plain", ""); // Empty content inhibits Content-length header so we have to close the socket ourselves.
     _server->client().stop(); // Stop is needed because we sent no content length
@@ -500,6 +559,7 @@ int ESPConfig::getRSSIasQuality(int RSSI) {
   return quality;
 }
 
+#ifdef LOGGING
 template <class T> void ESPConfig::debug (T text) {
   if (_debug) {
     Serial.print("*CONF: ");
@@ -515,3 +575,4 @@ template <class T, class U> void ESPConfig::debug (T key, U value) {
     Serial.println(value);
   }
 }
+#endif

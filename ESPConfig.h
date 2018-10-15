@@ -74,7 +74,6 @@ class ESPConfig {
         void            setPortalSSID(const char *apName);
         void            setPortalPassword(const char *apPass);
         bool            addParameter(ESPConfigParam *p);
-        void            setDebugOutput(bool debug);
         void            setFeedbackPin(uint8_t pin);
         void            setAPStaticIP(IPAddress ip, IPAddress gw, IPAddress sn);
         
@@ -113,7 +112,6 @@ class ESPConfig {
         uint8_t         _paramsCount        = 0;
         uint8_t         _max_params;
         bool            _connect;
-        bool            _debug              = true;
         uint8_t         _feedbackPin        = INVALID_PIN_NO;
 
         const uint8_t   DNS_PORT            = 53;
@@ -152,7 +150,9 @@ class ESPConfig {
         String      toStringIp(IPAddress ip);
         int         getRSSIasQuality(int RSSI);
 
+        #ifdef LOGGING
         template <class T> void debug(T text);
         template <class T, class U> void debug(T key, U value);
+        #endif
 };
 #endif
