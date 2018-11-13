@@ -135,8 +135,8 @@ bool ESPConfig::startConfigPortal() {
   return  WiFi.status() == WL_CONNECTED;
 }
 
-void ESPConfig::setConnectionTimeout(unsigned long seconds) {
-  _connectionTimeout = seconds;
+void ESPConfig::setWifiConnectTimeout(unsigned long millis) {
+  _wifiConnectTimeout = millis;
 }
 
 void ESPConfig::setPortalSSID(const char *apName) {
@@ -268,7 +268,7 @@ uint8_t ESPConfig::connectWiFi() {
 }
 
 uint8_t ESPConfig::waitForConnectResult() {
-  if (_connectionTimeout == 0) {
+  if (_wifiConnectTimeout == 0) {
     return WiFi.waitForConnectResult();
   } else {
     unsigned long start = millis();
@@ -280,7 +280,7 @@ uint8_t ESPConfig::waitForConnectResult() {
     #endif
     while (keepConnecting) {
       status = WiFi.status();
-      if (millis() > start + _connectionTimeout) {
+      if (millis() > start + _wifiConnectTimeout) {
         keepConnecting = false;
         #ifdef LOGGING
         debug(F("Connection timed out"));

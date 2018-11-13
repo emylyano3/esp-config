@@ -8,7 +8,7 @@ char            _stationName[5];
 
 void setup() {
     ESPConfig moduleConfig;
-    moduleConfig.setConnectionTimeout(30000);
+    moduleConfig.setWifiConnectTimeout(30000);
     moduleConfig.setPortalSSID("ConfigTesting");
     moduleConfig.setPortalPassword("mistery");
     moduleConfig.addParameter(&_param1);
