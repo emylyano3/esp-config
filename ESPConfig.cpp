@@ -92,7 +92,7 @@ void ESPConfig::connectWifiNetwork (bool existsConfig) {
 }
 
 bool ESPConfig::startConfigPortal() {
-  WiFi.mode(WIFI_AP_STA);
+  WiFi.mode(WIFI_AP);
   _connect = false;
   setupConfigPortal();
   while(1) {
