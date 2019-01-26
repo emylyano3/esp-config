@@ -64,13 +64,13 @@ ESPConfig::~ESPConfig() {
   }
 }
 
-void ESPConfig::connectWifiNetwork (bool existsConfig) {
+bool ESPConfig::connectWifiNetwork (bool existsConfig) {
   #ifdef LOGGING
   debug(F("Connecting to wifi network"));
   #endif
   bool connected = false;
   while (!connected) {
-    if (existsConfig) {
+    if (WiFi.SSID()) {
       #ifdef LOGGING
       debug(F("Connecting to saved network"));
       #endif
@@ -81,14 +81,22 @@ void ESPConfig::connectWifiNetwork (bool existsConfig) {
         debug(F("Could not connect to saved network. Going into config mode."));
         #endif
         connected = startConfigPortal();
+        if (configPortalHasTimeout()) {
+          break;
+        }
       }
     } else {
       #ifdef LOGGING
       debug(F("Going into config mode cause no config was found"));
       #endif
+      WiFi.persistent(false);
       connected = startConfigPortal();
     }
   }
+  if (!connected) {
+    WiFi.mode(WIFI_OFF);
+  }
+  return connected;
 }
 
 bool ESPConfig::startConfigPortal() {
@@ -96,6 +104,9 @@ bool ESPConfig::startConfigPortal() {
   _connect = false;
   setupConfigPortal();
   while(1) {
+    if (configPortalHasTimeout()) {
+      break;
+    }
     _dnsServer->processNextRequest();
     _server->handleClient();
     if (_connect) {
@@ -135,8 +146,29 @@ bool ESPConfig::startConfigPortal() {
   return  WiFi.status() == WL_CONNECTED;
 }
 
-void ESPConfig::setWifiConnectTimeout(unsigned long millis) {
-  _wifiConnectTimeout = millis;
+bool ESPConfig::configPortalHasTimeout() {
+    if(_configPortalTimeout == 0 || WiFi.softAPgetStationNum() > 0){
+      _configPortalStart = millis(); // kludge, bump configportal start time to skew timeouts
+      #ifdef LOGGING
+      debug(F("Stations connected to AP (config portal)"), WiFi.softAPgetStationNum());
+      #endif
+      return false;
+    }
+    bool to = (millis() > _configPortalStart + _configPortalTimeout);
+    #ifdef LOGGING
+    if (to) {
+      debug(F("Config portal has timed out"));
+    }
+    #endif
+    return to;
+}
+
+void ESPConfig::setConfigPortalTimeout(unsigned long seconds) {
+  _configPortalTimeout = seconds * 1000;
+}
+
+void ESPConfig::setWifiConnectTimeout(unsigned long seconds) {
+  _wifiConnectTimeout = seconds * 1000;
 }
 
 void ESPConfig::setPortalSSID(const char *apName) {
@@ -231,7 +263,7 @@ uint8_t ESPConfig::connectWifi(String ssid, String pass) {
   #ifdef LOGGING
   debug(F("Connecting as wifi client..."));
   #endif
-  if (WiFi.status() == WL_CONNECTED) {
+  if (WiFi.isConnected()) {;
     #ifdef LOGGING
     debug(F("Already connected. Bailing out."));
     #endif
@@ -240,7 +272,9 @@ uint8_t ESPConfig::connectWifi(String ssid, String pass) {
   if (_stationNameCallback) {
     WiFi.hostname(_stationNameCallback());
   }
+  WiFi.persistent(true);
   WiFi.begin(ssid.c_str(), pass.c_str());
+  WiFi.persistent(false);
   return waitForConnectResult();
 }
 
@@ -279,21 +313,31 @@ uint8_t ESPConfig::waitForConnectResult() {
     uint8_t retry = 0;
     #endif
     while (keepConnecting) {
-      status = WiFi.status();
       if (millis() > start + _wifiConnectTimeout) {
         keepConnecting = false;
         #ifdef LOGGING
         debug(F("Connection timed out"));
         #endif
       }
+      status = WiFi.status();
       if (status == WL_CONNECTED) {
         keepConnecting = false;
-      } else if (status == WL_CONNECT_FAILED) {
+      } else if (status == WL_NO_SSID_AVAIL) { // in case configured SSID cannot be reached
         #ifdef LOGGING
-        debug(F("Connection failed. Retrying: "), ++retry);
-        debug("Trying to begin connection again");
+        debug(F("Connection failed. SSID provided not available"), WiFi.SSID());
+        debug(F("Retrying"), ++retry);
         #endif
         WiFi.begin();
+      } else if (status == WL_IDLE_STATUS) { // when Wi-Fi is in process of changing between statuses
+        #ifdef LOGGING
+        debug(F("Status IDLE. Waiting to final state"));
+        #endif
+        delay(500);
+      } else if (status == WL_CONNECT_FAILED) { // if password is incorrect
+        #ifdef LOGGING
+        debug(F("Credentials provided wrong. Stop trying to connect"));
+        #endif
+        keepConnecting = false;
       }
       delay(100);
     }
@@ -343,6 +387,7 @@ void ESPConfig::setupConfigPortal() {
   _server->on("/scan", std::bind(&ESPConfig::handleWifi, this, true)); 
   _server->on("/wifisave", std::bind(&ESPConfig::handleWifiSave, this));
   _server->onNotFound(std::bind(&ESPConfig::handleNotFound, this));
+  _configPortalStart = millis();
   _server->begin();
   #ifdef LOGGING
   debug(F("HTTP server started"));
@@ -392,7 +437,7 @@ void ESPConfig::handleWifi(bool scan) {
         for (int j = i + 1; j < n; j++) {
           if (cssid == WiFi.SSID(indices[j])) {
             #ifdef LOGGING
-            debug("DUP AP: " + WiFi.SSID(indices[j]));
+            debug(F("DUP AP"), WiFi.SSID(indices[j]));
             #endif
             indices[j] = -1; // set dup aps to index -1
           }

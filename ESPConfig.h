@@ -66,12 +66,14 @@ class ESPConfig {
         ESPConfig();
         ~ESPConfig();
 
-        void            connectWifiNetwork(bool existConfig);
+        /* launch methods */
+        bool            connectWifiNetwork(bool existConfig);
         bool            startConfigPortal();
 
         /* setup methods */
         /* Set wifi connect timeout in millis */
-        void            setWifiConnectTimeout(unsigned long millis);
+        void            setWifiConnectTimeout(unsigned long seconds);
+        void            setConfigPortalTimeout(unsigned long seconds);
         void            setPortalSSID(const char *apName);
         void            setPortalPassword(const char *apPass);
         bool            addParameter(ESPConfigParam *p);
@@ -123,6 +125,8 @@ class ESPConfig {
         void    setupConfigPortal();
 
         unsigned long       _wifiConnectTimeout;
+        unsigned long       _configPortalTimeout;
+        unsigned long       _configPortalStart;
         
         // Signal feedback
         bool                _sigfbkIsOn           = false;
