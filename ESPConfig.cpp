@@ -67,10 +67,11 @@ ESPConfig::~ESPConfig() {
 bool ESPConfig::connectWifiNetwork (bool existsConfig) {
   #ifdef LOGGING
   debug(F("Connecting to wifi network"));
+  debug(F("Previous config found", existsConfig));
   #endif
   bool connected = false;
   while (!connected) {
-    if (WiFi.SSID()) {
+    if (existsConfig) {
       #ifdef LOGGING
       debug(F("Connecting to saved network"));
       #endif
