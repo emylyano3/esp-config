@@ -150,9 +150,6 @@ bool ESPConfig::startConfigPortal() {
 bool ESPConfig::configPortalHasTimeout() {
     if(_configPortalTimeout == 0 || WiFi.softAPgetStationNum() > 0){
       _configPortalStart = millis(); // kludge, bump configportal start time to skew timeouts
-      #ifdef LOGGING
-      debug(F("Stations connected to AP (config portal)"), WiFi.softAPgetStationNum());
-      #endif
       return false;
     }
     bool to = (millis() > _configPortalStart + _configPortalTimeout);
