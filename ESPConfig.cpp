@@ -397,12 +397,12 @@ void ESPConfig::handleWifi(bool scan) {
   if (captivePortal()) { 
     return;
   }
-  String page = FPSTR(HTTP_HEAD);
+  String page = FPSTR(HTTP_HEADER);
   page.replace("{v}", "Proeza Domotics");
   page += FPSTR(HTTP_SCRIPT);
   page += FPSTR(HTTP_STYLE);
   page += "<h2>Module config</h2>";
-  page += FPSTR(HTTP_HEAD_END);
+  page += FPSTR(HTTP_HEADER_END);
   if (scan) {
     int n = WiFi.scanNetworks();
     #ifdef LOGGING
@@ -543,12 +543,12 @@ void ESPConfig::handleWifiSave() {
     debug(_configParams[i]->getName(), _configParams[i]->getValue());
     #endif
   }
-  String page = FPSTR(HTTP_HEAD);
+  String page = FPSTR(HTTP_HEADER);
   page.replace("{v}", "Credentials Saved");
   page += FPSTR(HTTP_SCRIPT);
   page += FPSTR(HTTP_STYLE);
   page += "<h2>Module config</h2>";
-  page += FPSTR(HTTP_HEAD_END);
+  page += FPSTR(HTTP_HEADER_END);
   page += FPSTR(HTTP_SAVED);
   page += FPSTR(HTTP_END);
   _server->sendHeader("Content-Length", String(page.length()));
